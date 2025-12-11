@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: k8s-frontend:v1       # 👈 matches the image you built
+          imagePullPolicy: Never        # 👈 required for local k3s
+          ports:
+            - containerPort: 8001
+          env:
+            - name: BACKEND_URL
+              value: "http://backend-service:8000"

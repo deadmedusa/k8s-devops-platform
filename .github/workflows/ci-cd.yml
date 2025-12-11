@@ -1,0 +1,37 @@
+name: DevOps Platform CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install backend dependencies
+      working-directory: ./app/backend
+      run: pip install -r requirements.txt
+
+    - name: Install frontend dependencies
+      working-directory: ./app/frontend
+      run: pip install -r requirements.txt
+
+    - name: Run backend tests
+      working-directory: ./app/backend
+      run: echo "Running backend tests (none implemented yet)"
+
+    - name: Run frontend tests
+      working-directory: ./app/frontend
+      run: echo "Running frontend tests (none implemented yet)"
+

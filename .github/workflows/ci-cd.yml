@@ -50,11 +50,11 @@ jobs:
         with:
           context: ./app/backend
           push: true
-          tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-backend:v1
+          tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-backend:v6
       
       - name: Build and push frontend Docker image
         uses: docker/build-push-action@v5
         with:
           context: ./app/frontend
           push: true
-          tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-frontend:v1
+          tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-frontend:v6

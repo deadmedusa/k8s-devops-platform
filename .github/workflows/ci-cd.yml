@@ -47,12 +47,12 @@ jobs:
         password: ${{ secrets.GHCR_TOKEN }}
 
     - name: Build backend Docker image
-      working-directory: ./app/backend
+      working-directory: app/backend
       run: |
         docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-backend:v1 .
 
     - name: Build frontend Docker image
-      working-directory: ./app/frontend
+      working-directory: app/frontend
       run: |
         docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-frontend:v1 .
 

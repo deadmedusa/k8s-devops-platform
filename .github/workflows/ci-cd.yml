@@ -69,4 +69,4 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Deploy manifests
-        run: kubectl apply -R -f k8s/
+        run: kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml apply -R -f k8s/

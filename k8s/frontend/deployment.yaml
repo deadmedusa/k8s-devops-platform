@@ -14,12 +14,11 @@ spec:
       labels:
         app: frontend
     spec:
+      imagePullSecrets:
+        - name: ghcr-secret
       containers:
         - name: frontend
           image: ghcr.io/deadmedusa/k8s-frontend:PLACEHOLDER
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8001
-          env:
-            - name: BACKEND_URL
-              value: "http://backend-service:8000"
+            - containerPort: 8000

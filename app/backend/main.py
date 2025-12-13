@@ -11,11 +11,11 @@ def health():
 def info():
     return {
         "service": "k8s-devops-platform-backend",
-        "version": "25.0.0",
+        "version": "30.0.0",
         "environment": os.getenv("ENV", "dev")
     }
 
 @app.get("/hello")
 def hello():
-    return {"message": "Hello from Kubernetes DevOps Platform"}
+    return {"message": "Hello from Kubernetes DevOps Platform and updated to version 25.0.0."}
 

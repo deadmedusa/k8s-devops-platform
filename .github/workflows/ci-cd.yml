@@ -1,4 +1,4 @@
-name: DevOps Platform CI
+name: DevOps Platform CI/CD
 
 on:
   push:
@@ -7,34 +7,34 @@ on:
     branches: ["main"]
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      
+
       - name: Install backend dependencies
         working-directory: app/backend
         run: pip install -r requirements.txt
-      
+
       - name: Install frontend dependencies
         working-directory: app/frontend
         run: pip install -r requirements.txt
-      
+
       - name: Run backend tests
         working-directory: app/backend
         run: echo "Running backend tests (none implemented yet)"
-      
+
       - name: Run frontend tests
         working-directory: app/frontend
         run: echo "Running frontend tests (none implemented yet)"
-      
+
       # ---------------------------------------
       # Docker Build + Push to GitHub Registry
       # ---------------------------------------
@@ -44,17 +44,44 @@ jobs:
           registry: ghcr.io
           username: ${{ secrets.GHCR_USERNAME }}
           password: ${{ secrets.GHCR_TOKEN }}
-      
+
       - name: Build and push backend Docker image
         uses: docker/build-push-action@v5
         with:
           context: ./app/backend
           push: true
-          tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-backend:v6
-      
+          tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-backend:${{ github.sha }}
+
       - name: Build and push frontend Docker image
         uses: docker/build-push-action@v5
         with:
           context: ./app/frontend
           push: true
-          tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-frontend:v6
+          tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-frontend:${{ github.sha }}
+
+  deploy:
+    name: Deploy to k3s
+    runs-on: self-hosted
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.29.0
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBECONFIG_DATA }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Verify cluster access
+        run: kubectl get nodes
+
+      - name: Deploy manifests
+        run: kubectl apply -R -f k8s/

@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: k8s-frontend:v1       # 👈 matches the image you built
-          imagePullPolicy: Never        # 👈 required for local k3s
+          image: ghcr.io/deadmedusa/k8s-frontend:PLACEHOLDER
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8001
           env:

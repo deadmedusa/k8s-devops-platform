@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: k8s-backend:v1
-          imagePullPolicy: Never
+          image: ghcr.io/deadmedusa/k8s-backend:PLACEHOLDER
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000

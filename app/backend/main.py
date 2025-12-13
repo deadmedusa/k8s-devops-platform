@@ -11,7 +11,7 @@ def health():
 def info():
     return {
         "service": "k8s-devops-platform-backend",
-        "version": "1.0.0",
+        "version": "25.0.0",
         "environment": os.getenv("ENV", "dev")
     }
 

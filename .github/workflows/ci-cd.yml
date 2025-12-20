@@ -7,7 +7,11 @@ on:
     branches: ["main"]
 
 jobs:
+  # =========================
+  # CI: Build & Push Images
+  # =========================
   build-and-push:
+    name: Build and Push Images
     runs-on: ubuntu-latest
 
     steps:
@@ -35,9 +39,6 @@ jobs:
         working-directory: app/frontend
         run: echo "Running frontend tests (none implemented yet)"
 
-      # ---------------------------------------
-      # Docker Build + Push to GitHub Registry
-      # ---------------------------------------
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -45,22 +46,25 @@ jobs:
           username: ${{ secrets.GHCR_USERNAME }}
           password: ${{ secrets.GHCR_TOKEN }}
 
-      - name: Build and push backend Docker image
+      - name: Build and push backend image
         uses: docker/build-push-action@v5
         with:
           context: ./app/backend
           push: true
           tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-backend:${{ github.sha }}
 
-      - name: Build and push frontend Docker image
+      - name: Build and push frontend image
         uses: docker/build-push-action@v5
         with:
           context: ./app/frontend
           push: true
           tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-frontend:${{ github.sha }}
 
+  # =========================
+  # CD: Deploy via Helm
+  # =========================
   deploy:
-    name: Deploy to k3s
+    name: Deploy to k3s via Helm
     runs-on: self-hosted
     needs: build-and-push
     if: github.ref == 'refs/heads/main'
@@ -69,20 +73,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Apply Kubernetes manifests
-        run: kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml apply -R -f k8s/
-
-      - name: Update backend image
+      - name: Deploy backend update via Helm
         run: |
-          kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml set image deployment/backend-deployment \
-            backend=ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-backend:${{ github.sha }}
-
-      - name: Update frontend image
-        run: |
-          kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml set image deployment/frontend-deployment \
-            frontend=ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-frontend:${{ github.sha }}
-
-      - name: Wait for rollout
-        run: |
-          kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml rollout status deployment/backend-deployment
-          kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml rollout status deployment/frontend-deployment
+          helm upgrade devops-platform ./helm/devops-platform \
+            -f ./helm/devops-platform/values.yaml \
+            --set backend.image.tag=${GITHUB_SHA}

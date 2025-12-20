@@ -11,7 +11,7 @@ def health():
 def info():
     return {
         "service": "k8s-devops-platform-backend",
-        "version": "30.0.0",
+        "version": "new version after Helm istallation is 50.0.0",
         "environment": os.getenv("ENV", "dev")
     }
 

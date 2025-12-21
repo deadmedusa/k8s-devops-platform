@@ -9,10 +9,12 @@ def health():
 
 @app.get("/info")
 def info():
-    return 1 / 0
-
+    return {
+        "service": "k8s-devops-platform-backend",
+        "version": "new version after Helm istallation is 50.0.0",
+        "environment": os.getenv("ENV", "dev")
+    }
 
 @app.get("/hello")
 def hello():
     return {"message": "Hello from Kubernetes DevOps Platform and updated to version 25.0.0."}
-

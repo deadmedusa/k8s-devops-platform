@@ -13,12 +13,18 @@ spec:
     metadata:
       labels:
         app: backend
-    spec:
-      imagePullSecrets:
-        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
-      containers:
-        - name: backend
-          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
-          imagePullPolicy: IfNotPresent
-          ports:
-            - containerPort: {{ .Values.backend.containerPort }}
+spec:
+  imagePullSecrets:
+    {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+  containers:
+    - name: backend
+      image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+      imagePullPolicy: IfNotPresent
+      ports:
+        - containerPort: {{ .Values.backend.containerPort }}
+
+    {{- if .Values.sidecar.enabled }}
+    - name: sidecar
+      image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}"
+      imagePullPolicy: IfNotPresent
+    {{- end }}

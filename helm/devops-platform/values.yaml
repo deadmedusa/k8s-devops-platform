@@ -175,3 +175,9 @@ frontend:
 
 imagePullSecrets:
   - name: ghcr-secret
+
+sidecar:
+  enabled: true
+  image:
+    repository: ghcr.io/deadmedusa/k8s-sidecar
+    tag: latest

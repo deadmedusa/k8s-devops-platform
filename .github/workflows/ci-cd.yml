@@ -39,6 +39,9 @@ jobs:
         working-directory: app/frontend
         run: echo "Running frontend tests (none implemented yet)"
 
+      # -------------------------
+      # Login to GHCR
+      # -------------------------
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -46,6 +49,9 @@ jobs:
           username: ${{ secrets.GHCR_USERNAME }}
           password: ${{ secrets.GHCR_TOKEN }}
 
+      # -------------------------
+      # Build & Push Images
+      # -------------------------
       - name: Build and push backend image
         uses: docker/build-push-action@v5
         with:
@@ -60,6 +66,13 @@ jobs:
           push: true
           tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-frontend:${{ github.sha }}
 
+      - name: Build and push sidecar image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./app/sidecar
+          push: true
+          tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-sidecar:${{ github.sha }}
+
   # =========================
   # CD: Deploy via Helm
   # =========================
@@ -73,8 +86,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy backend update via Helm
+      - name: Deploy via Helm
         run: |
           helm upgrade devops-platform ./helm/devops-platform \
             -f ./helm/devops-platform/values.yaml \
-            --set backend.image.tag=${GITHUB_SHA}
+            --set backend.image.tag=${GITHUB_SHA} \
+            --set sidecar.image.tag=${GITHUB_SHA}

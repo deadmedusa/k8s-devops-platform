@@ -66,6 +66,15 @@ jobs:
           push: true
           tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-frontend:${{ github.sha }}
 
+
+      - name: DEBUG – show workspace
+        run: |
+          pwd
+          ls
+          ls app || echo "NO app directory"
+          ls app/sidecar || echo "NO sidecar directory"
+
+
       - name: Build and push sidecar image
         uses: docker/build-push-action@v5
         with:

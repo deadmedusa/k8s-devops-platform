@@ -20,7 +20,7 @@ spec:
       containers:
         # BACKEND (FastAPI)
         - name: backend
-          image: "{{ .Values.backend.image }}:{{ .Values.backend.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.backend.pullPolicy | default "Always" }}
           ports:
             - name: http-backend
@@ -60,7 +60,7 @@ spec:
 
         # FRONTEND
         - name: frontend
-          image: "{{ .Values.frontend.image }}:{{ .Values.frontend.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.frontend.pullPolicy | default "Always" }}
           ports:
             - name: http-frontend

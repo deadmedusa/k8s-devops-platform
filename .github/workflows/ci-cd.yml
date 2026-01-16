@@ -7,84 +7,54 @@ on:
     branches: ["main"]
 
 jobs:
-  # =========================
-  # CI: Build & Push Images
-  # =========================
   build-and-push:
     name: Build and Push Images
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install backend dependencies
-        working-directory: app/backend
-        run: pip install -r requirements.txt
-
-      - name: Install frontend dependencies
-        working-directory: app/frontend
-        run: pip install -r requirements.txt
-
-      - name: Run backend tests
-        working-directory: app/backend
-        run: echo "Running backend tests (none implemented yet)"
-
-      - name: Run frontend tests
-        working-directory: app/frontend
-        run: echo "Running frontend tests (none implemented yet)"
-
-      # -------------------------
-      # Login to GHCR
-      # -------------------------
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ secrets.GHCR_USERNAME }}
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.GHCR_TOKEN }}
 
-      # -------------------------
-      # Build & Push Images
-      # -------------------------
+      # --- BACKEND ---
       - name: Build and push backend image
         uses: docker/build-push-action@v5
         with:
           context: ./app/backend
           push: true
-          tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-backend:${{ github.sha }}
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/k8s-backend:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/k8s-backend:latest
 
+      # --- FRONTEND ---
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
         with:
           context: ./app/frontend
           push: true
-          tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-frontend:${{ github.sha }}
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/k8s-frontend:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/k8s-frontend:latest
 
-
-      - name: DEBUG – show workspace
-        run: |
-          pwd
-          ls
-          ls app || echo "NO app directory"
-          ls app/sidecar || echo "NO sidecar directory"
-
-
+      # --- SIDECAR ---
       - name: Build and push sidecar image
         uses: docker/build-push-action@v5
         with:
           context: ./app/sidecar
           push: true
-          tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/k8s-sidecar:${{ github.sha }}
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/k8s-sidecar:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/k8s-sidecar:latest
 
-  # =========================
-  # CD: Deploy via Helm
-  # =========================
   deploy:
     name: Deploy to k3s via Helm
     runs-on: self-hosted
@@ -97,7 +67,9 @@ jobs:
 
       - name: Deploy via Helm
         run: |
-          helm upgrade devops-platform ./helm/devops-platform \
+          # Теперь мы передаем теги для ВСЕХ ТРЕХ компонентов
+          helm upgrade --install devops-platform ./helm/devops-platform \
             -f ./helm/devops-platform/values.yaml \
             --set backend.image.tag=${GITHUB_SHA} \
+            --set frontend.image.tag=${GITHUB_SHA} \
             --set sidecar.image.tag=${GITHUB_SHA}

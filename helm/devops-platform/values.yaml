@@ -20,9 +20,9 @@ backend:
 
   image:
     repository: ghcr.io/deadmedusa/k8s-backend
-    tag: ""   # ТЕГ ПРИХОДИТ ИЗ CI (--set backend.image.tag=$GITHUB_SHA)
-
-  resources:
+    tag: "latest"
+    
+    resources:
     requests:
       cpu: "100m"
       memory: "128Mi"
@@ -36,11 +36,11 @@ backend:
 
 frontend:
   replicas: 1
-  containerPort: 8000
+  containerPort: 8001
 
   image:
     repository: ghcr.io/deadmedusa/k8s-frontend
-    tag: ""   # ТЕГ ПРИХОДИТ ИЗ CI
+    tag: "latest"   
 
 # =========================
 # Sidecar configuration

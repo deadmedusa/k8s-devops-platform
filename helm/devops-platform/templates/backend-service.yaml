@@ -15,7 +15,7 @@ spec:
       nodePort: 30080
     # Порт для Фронтенда (Web-интерфейс)
     - port: 80
-      targetPort: 80
+      targetPort: 8001
       protocol: TCP
       name: frontend
       nodePort: 30081
